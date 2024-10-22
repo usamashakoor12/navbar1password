@@ -207,7 +207,7 @@ function Navbar() {
       </nav>
 
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center py-20">
+      <section className="flex flex-col items-center justify-center py-20 mt-10">
         <h1 className="text-4xl md:text-6xl font-bold text-gray-800 text-center mb-6">
           Secure Your Digital Life
         </h1>
@@ -223,8 +223,7 @@ function Navbar() {
       {/* Features Section with Cards */}
       <section className="bg-white py-12">
         <div className="container mx-auto grid md:grid-cols-3 gap-8">
-
-          {/* Feature Card 1 */}         
+          {/* Feature Card 1 */}
           <div className="bg-gray-50 shadow-lg rounded-lg p-6 text-center">
             <h2 className="text-2xl font-bold mb-4">Password Vault</h2>
             <p className="text-gray-600">
