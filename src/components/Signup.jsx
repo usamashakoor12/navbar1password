@@ -1,12 +1,12 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import Font Awesome icons
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
 
 function Signup() {
   const [formData, setFormData] = useState({
-    userName: '',
-    firstName: '',
+    username: '',
+    first_name: '',
     lastName: '',
     email: '',
     password: '',
@@ -21,17 +21,16 @@ function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Password validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    axios.post('https://api.example.com/submit', formData)
+    axios.post('http://127.0.0.1:8000/api/users/signup', formData)
       .then(res => {
         console.log(res);   
         setResponse(res.data);
-        setError(''); // Clear error on success
+        setError(''); 
         e.target.reset();
       })
       .catch(err => {
@@ -68,7 +67,7 @@ function Signup() {
                 id="userName"
                 name="userName"
                 type="text"
-                onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Username"
@@ -80,7 +79,7 @@ function Signup() {
                 id="firstName"
                 name="firstName"
                 type="text"
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="First Name"
@@ -177,7 +176,7 @@ function Signup() {
             >
               Sign Up
             </button>
-            {response && <p>Response: {JSON.stringify(response)}</p>}
+            {/* {response && <p>Response: {JSON.stringify(response)}</p>} */}
           </div>
         </form>
       </div>
