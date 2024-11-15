@@ -1,8 +1,6 @@
-import React, { useRef, useState } from "react";
-import axios from "axios"; // Import axios
+import React, { useRef, useState, useEffect } from "react";
 import { X, Plus, KeyRound, NotebookText, CreditCard, Calendar, Inbox, FileText } from "lucide-react";
 import api from "../provider/AuthProvider";
-
 
 const items = [
   { id: 1, icon: <KeyRound size={20} className="text-blue-500" />, label: "Login" },
@@ -12,13 +10,27 @@ const items = [
   { id: 5, icon: <Inbox size={20} className="text-orange-500" />, label: "Inbox" },
   { id: 6, icon: <FileText size={20} className="text-teal-500" />, label: "Documents" },
   { id: 7, icon: <KeyRound size={20} className="text-blue-500" />, label: "Records" },
-  { id: 8, icon: <NotebookText size={20} className="text-green-500" />, label: "Library" }
+  { id: 8, icon: <NotebookText size={20} className="text-green-500" />, label: "Library" },
 ];
 
 function NewItem({ onClose }) {
   const modelRef = useRef();
+  const [vaults, setVaults] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [formData, setFormData] = useState({ field1: "", field2: "" });
+  const [formData, setFormData] = useState({ vault: "", type: "", data: "" });
+
+  useEffect(() => {
+    // Fetch available vaults from the backend
+    const fetchVaults = async () => {
+      try {
+        const response = await api.get('/api/vaults/');
+        setVaults(response.data); // Assume the API returns an array of vaults
+      } catch (error) {
+        console.error("Error fetching vaults:", error);
+      }
+    };
+    fetchVaults();
+  }, []);
 
   const closeModal = (e) => {
     if (modelRef.current === e.target) {
@@ -27,11 +39,12 @@ function NewItem({ onClose }) {
   };
 
   const handleClick = (item) => {
-    setSelectedItem(item); 
+    setSelectedItem(item);
+    setFormData({ ...formData, type: item.label }); // Set the selected type
   };
 
   const handleBack = () => {
-    setSelectedItem(null);  
+    setSelectedItem(null);
   };
 
   const handleChange = (e) => {
@@ -41,18 +54,15 @@ function NewItem({ onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form Data Before Submit:", JSON.stringify(formData, null, 2));
     try {
-      const response = await api.post(
-        '/api/secrets/', 
-        formData
-      );
-      console.log(response.data); 
+      const response = await api.post('/api/secrets/', formData);
+      console.log(response.data);
     } catch (error) {
       console.error(error);
-    }finally {
-        // Close the modal whether the API call succeeds or fails
-        onClose();
-      }
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -76,24 +86,29 @@ function NewItem({ onClose }) {
             <h2 className="text-xl font-semibold mb-4">{selectedItem.label} Form</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700">Field 1</label>
-                <input
-                  type="text"
-                  name="field1"
-                  value={formData.field1}
+                <label className="block text-gray-700">Vault</label>
+                <select
+                  name="vault"
+                  value={formData.vault}
                   onChange={handleChange}
-                  placeholder="Enter details"
                   className="w-full p-2 border rounded"
-                />
+                >
+                  <option value="">Select Vault</option>
+                  {vaults.map((vault) => (
+                    <option key={vault.id} value={vault.id}>
+                      {vault.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700">Field 2</label>
+                <label className="block text-gray-700">Data</label>
                 <input
                   type="text"
-                  name="field2"
-                  value={formData.field2}
+                  name="data"
+                  value={formData.data}
                   onChange={handleChange}
-                  placeholder="Enter more details"
+                  placeholder="Enter data"
                   className="w-full p-2 border rounded"
                 />
               </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import CreateVault from "./CreateVault";
 import { Plus } from 'lucide-react';
 import NewItem from "./NewItem";
@@ -7,19 +6,27 @@ import api from '../provider/AuthProvider';
 
 const VaultPage = () => {
   const [vaults, setVaults] = useState([]);
-  const [openModal, setOpenModal] = useState(null); 
+  const [selectedVault, setSelectedVault] = useState(null); 
+  const [openModal, setOpenModal] = useState(null);
 
   useEffect(() => {
+    fetchVaults();
+  }, []);
+
+  const fetchVaults = () => {
     api
-    .get("/api/vaults/")
-    .then((response) => {
-      console.log(response)
-      setVaults(response.data);
-  })
+      .get("/api/vaults/")
+      .then((response) => {
+        setVaults(response.data);
+      })
       .catch((error) => {
         console.error("Error fetching vault data:", error);
       });
-  }, []);
+  };
+
+  const addVault = (newVault) => {
+    setVaults((prevVaults) => [...prevVaults, newVault]);
+  };
 
   return (
     <div className="flex h-screen flex-col md:flex-row">
@@ -34,6 +41,7 @@ const VaultPage = () => {
               <li
                 key={vault.id || index}
                 className="p-2 bg-gray-300 rounded hover:bg-gray-400 cursor-pointer"
+                onClick={() => setSelectedVault(vault)} // Set selected vault on click
               >
                 {vault.name}
               </li>
@@ -64,10 +72,22 @@ const VaultPage = () => {
             New Item
           </button>
         </div>
-        {/* Display vault details or other main content here */}
+
+        {/* Display selected vault details or placeholder text */}
+        {selectedVault ? (
+          <div className="mt-6">
+            <h2 className="text-xl font-bold">{selectedVault.name}</h2>
+            <p className="mt-2 text-gray-700">Description: {selectedVault.description || 'No description available'}</p>
+            {/* Add more details about the selected vault as needed */}
+          </div>
+        ) : (
+          <p className="mt-6 text-gray-500">Select a vault to view details.</p>
+        )}
       </main>
 
-      {openModal === "createVault" && <CreateVault onClose={() => setOpenModal(null)} />}
+      {openModal === "createVault" && (
+        <CreateVault onClose={() => setOpenModal(null)} onVaultCreated={addVault} />
+      )}
       {openModal === "newItem" && <NewItem onClose={() => setOpenModal(null)} />}
     </div>
   );

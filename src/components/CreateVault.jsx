@@ -1,9 +1,8 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
 import { X } from "lucide-react";   
 import api from "../provider/AuthProvider";
 
-function CreateVault({ onClose }) {
+function CreateVault({ onClose, onVaultCreated }) {
   const modelRef = useRef();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -29,6 +28,7 @@ function CreateVault({ onClose }) {
 
       // Clear the input fields
       setName("");
+      onVaultCreated(response.data);
       setDescription("");   
     } catch (error) {
       console.error("Error creating vault:", error);
