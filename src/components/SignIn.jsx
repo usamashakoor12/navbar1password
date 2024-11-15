@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
 import axios from 'axios';
+import api from '../provider/AuthProvider';
 
 const SignIn = () => {
   const [username, setUsername] = useState('');
@@ -9,17 +10,24 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false); 
   const [error, setError] = useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); 
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login/', {
+      const response = await api.post('/api/login/', {
         username,
         password,
       });
-      
       console.log('Response:', response.data);
+      if (response.data.access) {
+        localStorage.setItem('token', response.data.access);;
+        localStorage.setItem("user", response.data.user.username)
+      }
+      navigate("/vault")
+      
     } catch (error) {
       setError('Login failed. Please check your credentials.');
       console.log('Error:', error);

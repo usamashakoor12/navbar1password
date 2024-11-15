@@ -21,7 +21,7 @@ function Navbar() {
               <Link to="/" className="flex-shrink-0">
                 <img
                   className="h-8 w-auto"
-                  src="https://1password.com/img/logo.png"
+                  src=""
                   alt="1Password"
                 />
               </Link>

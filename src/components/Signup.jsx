@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
 
 function Signup() {
@@ -18,6 +18,8 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for confirm password
 
+  const navigate = useNavigate()
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -26,12 +28,13 @@ function Signup() {
       return;
     }
 
-    axios.post('http://127.0.0.1:8000/api/users/signup', formData)
+    axios.post('/api/users/signup/', formData)
       .then(res => {
         console.log(res);   
         setResponse(res.data);
         setError(''); 
         e.target.reset();
+        navigate("/vault")
       })
       .catch(err => {
         console.error('Error submitting form', err);
@@ -118,7 +121,7 @@ function Signup() {
                 type={showPassword ? "text" : "password"}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
-                className="flex-1 px-3 py-2 appearance-none border-none rounded-l-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="flex-1 px-3 py-2 appearance-none border-none rounded-l-md w-full placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
               />
               <button
@@ -138,7 +141,7 @@ function Signup() {
                 type={showConfirmPassword ? "text" : "password"}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
-                className="flex-1 px-3 py-2 appearance-none border-none rounded-l-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="flex-1 px-3 py-2 appearance-none border-none rounded-l-md w-full placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Confirm Password"
               />
               <button
