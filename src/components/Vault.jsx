@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import CreateVault from "./CreateVault";
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import NewItem from "./NewItem";
 import api from '../provider/AuthProvider';
+import { useNavigate } from "react-router-dom";
 
 const VaultPage = () => {
   const [vaults, setVaults] = useState([]);
   const [selectedVault, setSelectedVault] = useState(null); 
   const [openModal, setOpenModal] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchVaults();
@@ -28,6 +31,21 @@ const VaultPage = () => {
     setVaults((prevVaults) => [...prevVaults, newVault]);
   };
 
+  const deleteVault = async (vaultId) => {
+    try {
+      await api.delete(`/api/vaults/${vaultId}/`); 
+      setVaults((prevVaults) => prevVaults.filter((vault) => vault.id !== vaultId));
+    } catch (error) {
+      console.error("Error deleting vault:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/signIn');
+  };
+
   return (
     <div className="flex h-screen flex-col md:flex-row">
       {/* Sidebar */}
@@ -37,13 +55,26 @@ const VaultPage = () => {
         {/* List of vaults */}
         <ul className="flex-1 space-y-2">
           {vaults.length > 0 ? (
-            vaults.map((vault, index) => (
+            vaults.map((vault) => (
               <li
-                key={vault.id || index}
-                className="p-2 bg-gray-300 rounded hover:bg-gray-400 cursor-pointer"
-                onClick={() => setSelectedVault(vault)} // Set selected vault on click
+                key={vault.id}
+                className="flex items-center justify-between p-2 bg-gray-300 rounded hover:bg-gray-400 cursor-pointer"
               >
-                {vault.name}
+                <span
+                  className="flex-1"
+                  onClick={() => setSelectedVault(vault)} // Set selected vault on click
+                >
+                  {vault.name}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent vault selection on delete click
+                    deleteVault(vault.id);
+                  }}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={20} />
+                </button>
               </li>
             ))
           ) : (
@@ -57,6 +88,12 @@ const VaultPage = () => {
           className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full"
         >
           Create Vault
+        </button>
+        <button
+          onClick={handleLogout}
+          className="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 w-full"
+        >
+          Logout
         </button>
       </aside>
 
@@ -78,7 +115,6 @@ const VaultPage = () => {
           <div className="mt-6">
             <h2 className="text-xl font-bold">{selectedVault.name}</h2>
             <p className="mt-2 text-gray-700">Description: {selectedVault.description || 'No description available'}</p>
-            {/* Add more details about the selected vault as needed */}
           </div>
         ) : (
           <p className="mt-6 text-gray-500">Select a vault to view details.</p>

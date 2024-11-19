@@ -17,14 +17,13 @@ function NewItem({ onClose }) {
   const modelRef = useRef();
   const [vaults, setVaults] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [formData, setFormData] = useState({ vault: "", type: "", data: "" });
+  const [formData, setFormData] = useState({ vault_id: "", type: "", data: {} });
 
   useEffect(() => {
-    // Fetch available vaults from the backend
     const fetchVaults = async () => {
       try {
-        const response = await api.get('/api/vaults/');
-        setVaults(response.data); // Assume the API returns an array of vaults
+        const response = await api.get("/api/vaults/");
+        setVaults(response.data);
       } catch (error) {
         console.error("Error fetching vaults:", error);
       }
@@ -40,7 +39,7 @@ function NewItem({ onClose }) {
 
   const handleClick = (item) => {
     setSelectedItem(item);
-    setFormData({ ...formData, type: item.label }); // Set the selected type
+    setFormData({ ...formData, type: item.label });
   };
 
   const handleBack = () => {
@@ -49,19 +48,33 @@ function NewItem({ onClose }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+
+    if (name.startsWith("data.")) {
+      const dataField = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        data: { ...prev.data, [dataField]: value },
+      }));
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data Before Submit:", JSON.stringify(formData, null, 2));
+    if (!formData.vault_id || !selectedItem) {
+      console.error("Vault ID and item type are required!");
+      return;
+    }
+
     try {
-      const response = await api.post('/api/secrets/', formData);
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
+      const response = await api.post("/api/secrets/", formData);
+      console.log("Data successfully posted:", response.data);
+      setFormData({ vault_id: "", type: "", data: {} });
+      setSelectedItem(null);
       onClose();
+    } catch (error) {
+      console.error("Error posting data:", error.response || error.message);
     }
   };
 
@@ -88,8 +101,8 @@ function NewItem({ onClose }) {
               <div className="mb-4">
                 <label className="block text-gray-700">Vault</label>
                 <select
-                  name="vault"
-                  value={formData.vault}
+                  name="vault_id"
+                  value={formData.vault_id}
                   onChange={handleChange}
                   className="w-full p-2 border rounded"
                 >
@@ -101,17 +114,49 @@ function NewItem({ onClose }) {
                   ))}
                 </select>
               </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Data</label>
-                <input
-                  type="text"
-                  name="data"
-                  value={formData.data}
-                  onChange={handleChange}
-                  placeholder="Enter data"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
+
+              {selectedItem.label === "Login" && (
+                <>
+                  <input
+                    type="text"
+                    name="data.username"
+                    value={formData.data.username || ""}
+                    onChange={handleChange}
+                    placeholder="Username"
+                    className="w-full p-2 border rounded mb-4"
+                  />
+                  <input
+                    type="password"
+                    name="data.password"
+                    value={formData.data.password || ""}
+                    onChange={handleChange}
+                    placeholder="Password"
+                    className="w-full p-2 border rounded mb-4"
+                  />
+                </>
+              )}
+
+              {selectedItem.label === "Credit Card" && (
+                <>
+                  <input
+                    type="text"
+                    name="data.card_number"
+                    value={formData.data.card_number || ""}
+                    onChange={handleChange}
+                    placeholder="Card Number"
+                    className="w-full p-2 border rounded mb-4"
+                  />
+                  <input
+                    type="text"
+                    name="data.expiry_date"
+                    value={formData.data.expiry_date || ""}
+                    onChange={handleChange}
+                    placeholder="Expiry Date"
+                    className="w-full p-2 border rounded mb-4"
+                  />
+                </>
+              )}
+
               <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
                 Save
               </button>

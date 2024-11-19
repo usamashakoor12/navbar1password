@@ -26,7 +26,6 @@ function CreateVault({ onClose, onVaultCreated }) {
       );
       console.log("Vault created:", response.data);
 
-      // Clear the input fields
       setName("");
       onVaultCreated(response.data);
       setDescription("");   
